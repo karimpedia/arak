@@ -10,8 +10,11 @@ from setuptools import setup
 from setuptools import find_packages
 
 
-install_requires = []
-tests_require = install_requires + ["pytest"]
+install_requires = ["keras>=1.2.0",
+                    "PIL>=1.1.7",
+                    "h5py>=2.6.0",
+                    "scikit-learn>=0.18.1"]
+tests_require = install_requires + ["pytest>=3.0.5"]
 docs_require = install_requires
 extras_require = {"tests": tests_require,
                   "docs": docs_require}
@@ -20,7 +23,6 @@ extras_require = {"tests": tests_require,
 setup_options = \
     dict(name='arak',
          version='0.0.1',
-         packages=['arak'],
          license='GNU',
          author='Karim Said',
          author_email='karim.pedia@gmail.com',
