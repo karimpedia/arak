@@ -55,7 +55,7 @@ GENERATOR_CODE_DIM = 100
 GENERATOR_OPTIMIZER = Adam(1e-4)
 DISCRIMINATOR_OPTIMIZER = Adam(1e-3)
 REPRESENTATION_DIMS = (IMG_ROWS, IMG_COLS, 1)
-NUM_EPOCHS = 100
+NUM_EPOCHS = 300
 BATCH_SIZE = 100
 # -----------------------------------------------------------------------------
 # =============================================================================
@@ -272,6 +272,6 @@ if __name__ == '__main__':
     GEN = build_generator()
     DSC = build_discriminator()
     GAN = build_gan(GEN, DSC)
-    fit_gan(GEN, DSC, GAN, trainX, BATCH_SIZE, 3, shuffle=True)
+    fit_gan(GEN, DSC, GAN, trainX, BATCH_SIZE, NUM_EPOCHS, shuffle=True)
     #print train_disc_on_batch(GEN, DSC, GAN, trainX[:BATCH_SIZE, :])
     #print train_gen_on_batch(GEN, DSC, GAN, BATCH_SIZE)
