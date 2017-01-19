@@ -257,8 +257,8 @@ def fit_gan(gModel, dModel, ganModel, in_data, batch_size, num_epochs,
                         cS=bCounter, tS=len(batch_start_ind),
                         gL=gLoss, dL=dLoss, gT=gTime, dT=dTime, imgT=imgTime,
                         stepT=time.time()-step_time)
-        generate_and_save(gModel, dModel, ganModel, 1000,
-                          '{:05d}-{:05d}'.format(eCounter, bCounter))
+            generate_and_save(gModel, dModel, ganModel, 1024,
+                              '{:05d}-{:05d}'.format(eCounter, bCounter))
         print 'E {cE:0{fZ}}/{tE}) '\
             'GLoss: {gL:018.15f}, DLoss: {dL:018.15f}'\
             .format(fZ=len(str(num_epochs)),
