@@ -6,36 +6,14 @@ Created on Wed Jan 18 12:50:56 2017
 @author: karim
 """
 
-import os
-import os.path as osp
-import sys
 
 import numpy as np
 import tensorflow as tf
 
-from datetime import datetime
-
-from keras.layers import Activation, Dense, Input
-from keras.layers import LeakyReLU
-from keras.models import Model, Sequential
-from keras.optimizers import Adam
-from sklearn.datasets import fetch_mldata
-
-
-
 import arak
 import arak.exp
 
-from arak.util.path import makedirpath, splitroot
-
-
-# ================================================================= Identifiers
-_timestamp = datetime.now().strftime('%y%m%d%H%M%S%f')
-_outDirPath = osp.join(os.getcwd(), 'tmp',
-                       osp.split(splitroot(__file__)[-1])[0],
-                       osp.splitext(osp.basename(__file__))[0], _timestamp)
-# makedirpath(_outDirPath)
-# =============================================================================
+from arak.util.path import makedirpath, splitroot  # nopep8
 
 
 class DataDistribution(object):
@@ -47,6 +25,7 @@ class DataDistribution(object):
         samples = np.random.normal(self.mu, self.sigma, N)
         samples.sort()
         return samples
+
 
 class GeneratorDistribution(object):
     def __init__(self, d_range):
@@ -61,16 +40,15 @@ def linear(input, output_dim, scope=None, stddev=1.0):
     norm = tf.random_normal_initializer(stddev=stddev)
     const = tf.constant_initializer(0.0)
     with tf.variable_scope(scope or 'linear'):
-        w = tf.get_variable('w', 
+        w = tf.get_variable('w',
                             [input.get_shape()[1], output_dim],
-                            initializer= norm)
+                            initializer=norm)
         b = tf.get_variable('b',
                             [output_dim],
                             initializer=const)
         return tf.matmul(input, w) + b
-            
-            
-            
+
+
 def generator(input, h_dim):
     h0 = tf.nn.softplus(linear(input, h_dim, 'g0'))
     h1 = linear(h0, 1, 'g1')
