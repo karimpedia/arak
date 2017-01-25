@@ -34,3 +34,4 @@ def makedirpath(path):
                 pass
             else:
                 raise
+    return path

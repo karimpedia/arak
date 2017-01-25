@@ -285,6 +285,7 @@ class MultiGSingleD(object):
                 print(outString)
                 genX, genY, disY, advY = \
                     self._generate_all(realX.shape[0])
+
                 self._fit_dis_list(realX, genY, disY)
                 genX, genY, disY, advY = \
                     self._generate_all(realX.shape[0]*3)

@@ -13,6 +13,8 @@ from setuptools import find_packages
 install_requires = ["keras>=1.2.0",
                     "PIL>=1.1.7",
                     "h5py>=2.6.0",
+                    "click>=6.7",
+                    "pandas>=0.19.2",
                     "scikit-learn>=0.18.1"]
 tests_require = install_requires + ["pytest>=3.0.5"]
 docs_require = install_requires

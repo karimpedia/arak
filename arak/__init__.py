@@ -46,13 +46,6 @@ def get_tensorflow_session(gpu_memfrac=None):
     return cSession
 
 
-def TS(msg=None):
-    if msg is None:
-        return datetime.now().strftime('%Y.%m.%d %H:%M:%S.%f') + ') '
-    else:
-        return datetime.now().strftime('%Y.%m.%d %H:%M:%S.%f') + ') ' + msg
-
-
 def default():
     pass
 

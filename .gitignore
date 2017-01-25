@@ -112,6 +112,7 @@ ENV/
 *.tar
 *.zip
 *.npy
+*.hdf
 *.pkl
 
 # Logs and databases #

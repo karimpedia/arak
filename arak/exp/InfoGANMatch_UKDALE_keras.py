@@ -16,7 +16,6 @@ import sys
 
 from collections import OrderedDict
 from collections import Iterable
-from datetime import datetime
 
 from keras.models import Model, Sequential
 from keras.layers import Input, Dense, Reshape, merge
@@ -43,7 +42,6 @@ from arak.util.path import makedirpath, splitroot
 
 
 # ================================================================= Identifiers
-_timestamp = datetime.now().strftime('%y%m%d%H%M%S%f')
 _outDirPath = osp.join(os.getcwd(), 'tmp',
                        osp.split(splitroot(__file__)[-1])[0],
                        osp.splitext(osp.basename(__file__))[0], _timestamp)
@@ -103,12 +101,6 @@ class MultiGSingleD(object):
         appliance_b = 'dishwasher'
         sg_samplingInterval = 6  # Seconds
         cnn_normalization = 1e4
-        start_ts = \
-            [pd.Timestamp(2014, 1, 1, 0, 0, 0),
-             pd.Timestamp(2016, 1, 1, 0, 0, 0)]
-        end_ts = \
-            [pd.Timestamp(2014, 2, 1, 0, 0, 0) - offsets.Second(),
-             pd.Timestamp(2016, 2, 1, 0, 0, 0) - offsets.Second()]
         # ---------------------------------------------------------------------
         for x in self.appliance_list:
             self.appliance_signals = OrderedDict()
@@ -122,93 +114,6 @@ class MultiGSingleD(object):
         
         
         
-        cAAppTrain = [self._load_ukdale_appliance
-                      ukdale.load_appliance_hdf(house_id, appliance_a,
-                                                x, y, load_boundaries=True)
-                      for x, y in zip(start_timestamps_train,
-                                      end_timestamps_train)]
-        cBAppTrain = [ukdale.load_appliance_hdf(house_id, appliance_b,
-                                                x, y, load_boundaries=True)
-                      for x, y in zip(start_timestamps_train,
-                                      end_timestamps_train)]
-        # ---------------------------------------------------------------------
-        cAAppValid = [ukdale.load_appliance_hdf(house_id, appliance_a,
-                                                x, y, load_boundaries=True)
-                      for x, y in zip(start_timestamps_valid,
-                                      end_timestamps_valid)]
-        cBAppValid = [ukdale.load_appliance_hdf(house_id, appliance_b,
-                                                x, y, load_boundaries=True)
-                      for x, y in zip(start_timestamps_valid,
-                                      end_timestamps_valid)]
-        # ---------------------------------------------------------------------
-        cAAppTrain = \
-            [ukdale.resample_signal_NSecond(input_signal=x,
-                                            start_timestamp=y,
-                                            end_timestamp=z,
-                                            N=6, limit=300)
-             for x, y, z in zip(cAAppTrain,
-                                start_timestamps_train,
-                                end_timestamps_train)]
-        cBAppTrain = \
-            [ukdale.resample_signal_NSecond(input_signal=x,
-                                            start_timestamp=y,
-                                            end_timestamp=z,
-                                            N=6, limit=300)
-             for x, y, z in zip(cBAppTrain,
-                                start_timestamps_train,
-                                end_timestamps_train)]
-        # ---------------------------------------------------------------------
-        cAAppValid = \
-            [ukdale.resample_signal_NSecond(input_signal=x,
-                                            start_timestamp=y,
-                                            end_timestamp=z,
-                                            N=6, limit=300)
-             for x, y, z in zip(cAAppValid,
-                                start_timestamps_valid,
-                                end_timestamps_valid)]
-        cBAppValid = \
-            [ukdale.resample_signal_NSecond(input_signal=x,
-                                            start_timestamp=y,
-                                            end_timestamp=z,
-                                            N=6, limit=300)
-             for x, y, z in zip(cBAppValid,
-                                start_timestamps_valid,
-                                end_timestamps_valid)]
-        # ---------------------------------------------------------------------
-        cAAppTrainDF = pd.DataFrame()
-        for x in cAAppTrainDF:
-            cAAppTrainDF = pd.concat((cAAppTrainDF, x))
-        cBAppTrain = pd.DataFrame()
-        for x in cBAppTrainDF:
-            cBAppTrain = pd.concat((cBAppTrain, x))
-        # -------------------------------------------------------------------------
-        cRefAppValid = pd.DataFrame()
-        for x in cRefAppValidDF:
-            cRefAppValid = pd.concat((cRefAppValid, x))
-        cRawAppValid = pd.DataFrame()
-        for x in cRawAppValidDF:
-            cRawAppValid = pd.concat((cRawAppValid, x))
-        # -------------------------------------------------------------------------
-        cRefAppTrain.sort_index(ascending=True, inplace=True, kind='quicksort')
-        cRawAppTrain.sort_index(ascending=True, inplace=True, kind='quicksort')
-        cRefAppValid.sort_index(ascending=True, inplace=True, kind='quicksort')
-        cRawAppValid.sort_index(ascending=True, inplace=True, kind='quicksort')
-        # -------------------------------------------------------------------------
-        print _cDispSectionBreaker
-        return cRefAppTrain.P.values, cRawAppTrain.P.values, \
-        cRefAppValid.P.values, cRawAppValid.P.values
-
-
-        (trainX, trainY), (testX, testY) = mnist.load_data()
-        trainX = trainX.astype(np.float32) / 255.0
-        testX = testX.astype(np.float32) / 255.0
-        trainX = trainX.reshape((trainX.shape[0],) + self.IMG_SHAPE + (1,))
-        testX = testX.reshape((testX.shape[0],) + self.IMG_SHAPE + (1,))
-        self.trainX = trainX
-        self.testX = testX
-        self.trainY = trainY
-        self.testY = testY
-        return self
 
     def _load_ukdale_appliance(house_id, appliane_id, tsStart, tsEnd):
         x = ukdale.load_appliance_hdf(house_id, appliance_id, tsStart, tsEnd,
@@ -253,77 +158,9 @@ class MultiGSingleD(object):
     def _build_generator(self):
         inLayer = Input(shape=self.code_shape)
 
-        c01 = Convolution1D(nb_filter=16, filter_length=3, border_mode='same', dim_ordering='tf')(inLayer)
-        c01 = Activation('relu')(BatchNormalization(mode=2)(c01))
-        c01 = Convolution1D(nb_filter=16, filter_length=3, border_mode='same', dim_ordering='tf')(c01)
-        c01 = Activation('relu')(BatchNormalization(mode=2)(c01))
-        p01 = MaxPooling1D(pool_length=2, stride=None, border_mode='valid', dim_ordering='tf')(c01)
         
-        c02 = Convolution1D(nb_filter=32, filter_length=3, border_mode='same', dim_ordering='tf')(p01)
-        c02 = Activation('relu')(BatchNormalization(mode=2)(c02))
-        c02 = Convolution1D(nb_filter=32, filter_length=3, border_mode='same', dim_ordering='tf')(c02)
-        c02 = Activation('relu')(BatchNormalization(mode=2)(c02))
-        p02 = MaxPooling1D(pool_length=2, stride=None, border_mode='valid', dim_ordering='tf')(c02)
-
-        c03 = Convolution1D(nb_filter=64, filter_length=3, border_mode='same', dim_ordering='tf')(p02)
-        c03 = Activation('relu')(BatchNormalization(mode=2)(c03))
-        c03 = Convolution1D(nb_filter=64, filter_length=3, border_mode='same', dim_ordering='tf')(c03)
-        c03 = Activation('relu')(BatchNormalization(mode=2)(c03))
-        p03 = MaxPooling1D(pool_length=3, stride=None, border_mode='valid', dim_ordering='tf')(c03)
-
-        c04 = Convolution1D(nb_filter=128, filter_length=3, border_mode='same', dim_ordering='tf')(p03)
-        c04 = Activation('relu')(BatchNormalization(mode=2)(c04))
-        c04 = Convolution1D(nb_filter=128, filter_length=3, border_mode='same', dim_ordering='tf')(c04)
-        c04 = Activation('relu')(BatchNormalization(mode=2)(c04))
-        
-        m05 = merge([UpSampling1D(length=3)(c04), c03], mode='concat', concat_axis=3)
-        c05 = Convolution1D(nb_filter=64, filter_length=3, border_mode='same', dim_ordering='tf')(m05)
-        c05 = Activation('relu')(BatchNormalization(mode=2)(c05))
-        c05 = Convolution1D(nb_filter=64, filter_length=3, border_mode='same', dim_ordering='tf')(c05)
-        c05 = Activation('relu')(BatchNormalization(mode=2)(c05))
-
-        m06 = merge([UpSampling1D(length=2)(c05), c02], mode='concat', concat_axis=3)
-        c06 = Convolution1D(nb_filter=32, filter_length=3, border_mode='same', dim_ordering='tf')(m06)
-        c06 = Activation('relu')(BatchNormalization(mode=2)(c06))
-        c06 = Convolution1D(nb_filter=32, filter_length=3, border_mode='same', dim_ordering='tf')(c06)
-        c06 = Activation('relu')(BatchNormalization(mode=2)(c06))
-
-        m07 = merge([UpSampling1D(length=2)(c06), c01], mode='concat', concat_axis=3)
-        c07 = Convolution1D(nb_filter=16, filter_length=3, border_mode='same', dim_ordering='tf')(m07)
-        c07 = Activation('relu')(BatchNormalization(mode=2)(c07))
-        c07 = Convolution1D(nb_filter=16, filter_length=3, border_mode='same', dim_ordering='tf')(c07)
-        c07 = Activation('relu')(BatchNormalization(mode=2)(c07))
-
-        outLayer = Activation('sigmoid')(Convolution1D(nb_filter=1, filter_length=3, border_mode='same', dim_ordering='tf')(c07))
-
-        model = Model(input=inLayer, output=outLayer)
-        model.compile(loss='binary_crossentropy', optimizer=Adam(lr=0.001))
         return model
 
-    def _build_discriminator(self):
-        inLayerA = Input(shape=self.code_shape)
-        inLayerB = Input(shape=self.code_shape)
-
-        x = merge([inLayerA, inLayerB], mode='concat', concat_axis=3)
-
-        x = Convolution2D(nb_filter=64, nb_row=3, nb_col=3, border_mode='same',
-                          init='he_normal', dim_ordering='tf')(x)
-        x = Activation('sigmoid')(x)
-        x = MaxPooling2D(pool_size=(2, 2), border_mode='valid',
-                         dim_ordering='tf')(x)
-        x = Convolution2D(nb_filter=32, nb_row=3, nb_col=3, border_mode='same',
-                          init='he_normal', dim_ordering='tf')(x)
-        x = Activation('sigmoid')(x)
-        x = MaxPooling2D(pool_size=(2, 2), border_mode='valid',
-                         dim_ordering='tf')(x)
-        x = Flatten()(x)
-        x = Dense(1024, init='he_normal')(x)
-        x = Activation('sigmoid')(x)
-        x = Dense(3, init='he_normal')(x)
-        outLayer = Activation('sigmoid')(x)
-        model = Model(input=inLayer, output=outLayer)
-        model.compile(loss='binary_crossentropy', optimizer=Adam(lr=0.001))
-        return model
 
     def _build_adversarial(self, fGEN, fDIS):
         fDIS.trainable = False
